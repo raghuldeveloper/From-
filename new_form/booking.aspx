@@ -13,6 +13,9 @@
          .form-check-input{
              margin-left:18px;
          }
+        /* #updown{
+             display:none;
+         } */
          .ticket{
              border:solid black 1px;
              border-radius:10px;
@@ -20,7 +23,7 @@
              width:40%;
              place-items:center;
              position:absolute;
-             top:70%;
+             top:90%;
              left:50%;
              transform:translate(-50%,-50%);
              text-align:center;
@@ -92,12 +95,31 @@
             <br />
             <div class="form">
                 <div class="input-group flex-nowrap">
-                    <span class="input-group-text" for="date">Orgin Date :</span>
-                    <input type="date" class="form-control" id="Orgindate" aria-label="Username" aria-describedby="addon-wrapping" />
+                    <span class="input-group-text" for="date">start Date :</span>
+                    <input type="date" class="form-control" id="Orgindate" onchange="updateMaxEndDate()" aria-label="Username" aria-describedby="addon-wrapping" />
                 </div>
             </div>
             <br />
             <br />
+            <div class="form" id="updown">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" for="date" >Return Date :</span>
+                    <input type="date" class="form-control" name="dateRange" id="endDate" aria-label="Username" disabled aria-describedby="addon-wrapping" />
+                </div>
+            </div>
+            <br />
+            <br />
+            <div class="form">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="mode" for="tripType">mode :</span>
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="radio" name="tripType" id="singleRadio" value="single"  onclick="toggleEndDateField()" aria-label="Radio button for following text input" />Single
+                        <input class="form-check-input mt-0" type="radio" name="tripType" id="returnRadio" value="return"  onclick="toggleEndDateField()" aria-label="Radio button for following text input" />Up and Down
+                    </div>
+                </div>
+            </div>
+                <br />
+                <br />
             <div class="form">
                 <div class="input-group flex-nowrap">
                     <span class="input-group-text" id="gender" for="gender">Gender :</span>
@@ -106,6 +128,7 @@
                     <input class="form-check-input mt-0" type="radio" name="gender" value="female" aria-label="Radio button for following text input" />Female
                     <input class="form-check-input mt-0" type="radio" name="gender" value="others" aria-label="Radio button for following text input" />Others
                     </div>
+                </div>
                 </div>
                 <br />
                 <br />
@@ -116,7 +139,8 @@
         </div>
     </form>
     <script>
-         debugger
+        debugger
+
         var orgin_Date = document.getElementById('Orgindate');
         var dob = document.getElementById('dob');
         // Create a new Date object for the current date
@@ -133,6 +157,62 @@
         // Calculate the maximum date (three months from now)
         orgin_Date.setAttribute("max", maxDate);
         dob.setAttribute("max", formattedDate);
+
+      
+
+
+
+        // Function to toggle the End Date field's disabled state
+        function toggleEndDateField() {
+
+
+            var returnRadio = document.getElementById("returnRadio");
+            var endDateField = document.getElementById("endDate");
+
+
+            if (returnRadio.checked) {
+                endDateField.disabled = false;
+                endDateField.setAttribute("max", maxDate);
+
+                updateMaxEndDate();
+            } else {
+                endDateField.disabled = true;
+            }
+        }
+
+        // Function to update the maximum allowed End Date based on Orgindate
+        function updateMaxEndDate() {
+
+            const OrgindateField = document.getElementById("Orgindate");
+            const endDateField = document.getElementById("endDate");
+
+            endDateField.setAttribute("max", maxDate);
+
+
+            if (!OrgindateField.value) {
+                endDateField.max = ""; // Clear the max attribute
+                return;
+            }
+
+            const Orgindate = new Date(OrgindateField.value);
+            Orgindate.setMonth(Orgindate.getMonth() + 3); // Add three months
+
+            const maxEndDate = new Date(Orgindate);
+            maxEndDate.setDate(maxEndDate.getDate() - 1); // Set to one day before
+
+            endDateField.setAttribute("max", maxDate);
+
+
+            endDateField.max = maxEndDate.toISOString().split('T')[0]; // Format to ISO date
+
+            // Ensure the Return Date is not greater than three months from Orgindate
+            const currentReturnDate = new Date(endDateField.value);
+            if (currentReturnDate > maxEndDate) {
+                endDateField.value = maxEndDate.toISOString().split('T')[0];
+            }
+        }
+
+
         document.getElementById("info").addEventListener("submit", function (event) {
             event.preventDefault(); // Prevent the form from submitting in the default way
             // console.log("pass")
